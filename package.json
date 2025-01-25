@@ -9,8 +9,7 @@
     "lint": "next lint",
     "typegen": "npx sanity@latest schema extract && npx sanity@latest typegen generate",
     "import-data": "node scripts/importData.mjs",
-    "cypress:open" :"cypress open"
-
+    "cypress:open": "cypress open"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.9.6",
@@ -34,8 +33,8 @@
     "next": "^15.1.5",
     "next-sanity": "^9.8.31",
     "node-cron": "^3.0.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-icon": "^1.0.0",
     "react-icons": "^5.4.0",
     "react-is": "^19.0.0",
