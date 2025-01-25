@@ -10,8 +10,8 @@ export const client = createClient({
   token: process.env.NEXT_PUBLIC_SANITY_TOKEN,
   ignoreBrowserTokenWarning: true,
   stega: {
-    studioUrl: process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}/studio`
+    studioUrl: process.env.NODE_ENV === 'production'
+      ? `https://iphone-store-online.vercel.app`
       : `${process.env.NEXT_PUBLIC_BASE_URL}/studio`,
   }
   
