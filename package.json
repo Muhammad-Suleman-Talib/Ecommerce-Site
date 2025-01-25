@@ -19,6 +19,7 @@
     "@sanity/client": "^6.24.3",
     "@sanity/icons": "^3.5.7",
     "@sanity/image-url": "^1.1.0",
+    "@sanity/types": "^3.71.2",
     "@sanity/vision": "^3.68.3",
     "@tailwindcss/typography": "^0.5.16",
     "axios": "^1.7.9",
