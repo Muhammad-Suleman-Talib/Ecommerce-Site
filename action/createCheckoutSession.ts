@@ -48,7 +48,7 @@ function extractPlainText(description: any): string {
       metadata,
       mode: "payment",
       allow_promotion_codes: true,
-      success_url: `https://iphone-store-online.vercel.app/success?session_Id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`,
+      success_url: `https://iphone-store-online.vercel.app/success?orderNumber=${metadata.orderNumber}`,
       cancel_url: `https://iphone-store-online.vercel.app/basket`,
       
       line_items: items.map((item) => ({
