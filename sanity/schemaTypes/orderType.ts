@@ -8,62 +8,56 @@ const orderType = {
   icon: BasketIcon,
   fields: [
     defineField({
-      name: "nameNumber",
+      name: "nameNumber", // Order name
       title: "Order Name",
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "stripeCheckoutSeccionId",
+      name: "stripeCheckoutSeccionId", // Stripe Checkout Session ID
       title: "Stripe Checkout Session ID",
       type: "string",
     }),
     defineField({
-      name: "stripeCustomerId",
+      name: "stripeCustomerId", // Stripe Customer ID
       title: "Stripe Customer ID",
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "clerkUserId",
+      name: "clerkUserId", // Clerk User ID
       title: "Clerk User ID",
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "customerName",
+      name: "customerName", // Customer Name
       title: "Customer Name",
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "customerEmail",
+      name: "customerEmail", // Customer Email
       title: "Customer Email",
       type: "string",
       validation: (Rule) => Rule.required().email(),
     }),
     defineField({
-      name: "stripePaymentIntentId",
-      title: "Stripe Payment Intent ID",
-      type: "string",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "products",
-      title: "Products Bought",
+      name: "products", // Array of products
+      title: "Products",
       type: "array",
       of: [
         defineArrayMember({
           type: "object",
           fields: [
             defineField({
-              name: "product",
-              title: "Product Bought",
+              name: "image", // Product Image
+              title: "Product Image",
               type: "reference",
-              to: [{ type: "productType" }],
+              to: [{ type: "productType" }], // Linking to the productType document
             }),
             defineField({
-              name: "quantity",
+              name: "quantity", // Quantity bought
               title: "Quantity Bought",
               type: "number",
             }),
@@ -86,25 +80,25 @@ const orderType = {
       ],
     }),
     defineField({
-      name: "total",
+      name: "total", // Total amount
       title: "Total Amount",
       type: "number",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "currency",
+      name: "currency", // Currency
       title: "Currency",
       type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "amountDiscounted",
+      name: "amountDiscounted", // Amount discounted
       title: "Amount Discounted",
       type: "number",
       validation: (Rule) => Rule.required().min(0),
     }),
     defineField({
-      name: "status",
+      name: "status", // Order status
       title: "Order Status",
       type: "string",
       options: {
@@ -118,7 +112,7 @@ const orderType = {
       },
     }),
     defineField({
-      name: "orderDate",
+      name: "orderDate", // Order date
       title: "Order Date",
       type: "datetime",
       validation: (Rule) => Rule.required(),
@@ -132,7 +126,7 @@ const orderType = {
       currency: "currency",
       orderId: "nameNumber",
     },
-    prepare: ({ name, email, amount, currency, orderId }:any) => {
+    prepare: ({ name, email, amount, currency, orderId }) => {
       const orderSnippet = `${orderId.slice(0, 5)}...${orderId.slice(-5)}`;
       return {
         title: `${name} (${orderSnippet})`,

@@ -46,8 +46,9 @@ export async function POST(req: NextRequest) {
 
 }
 
-
 async function createOrderInSanity(session: Stripe.Checkout.Session) {
+  console.log("Session Data:", session); // Log the session data
+
   const {
     id,
     amount_total,
@@ -55,9 +56,10 @@ async function createOrderInSanity(session: Stripe.Checkout.Session) {
     payment_intent,
     customer,
     total_details,
-
-
   } = session;
+
+  // Log metadata to ensure it's being populated
+  console.log("Metadata:", metadata);
 
   const {
     orderNumber,
@@ -65,40 +67,49 @@ async function createOrderInSanity(session: Stripe.Checkout.Session) {
     customerEmail,
     ClerkUserId,
     orderDate
-    } = metadata as Metadata;
+  } = metadata as Metadata;
 
-    const LineItemWithProduct = await Stripe.Checkout.session.listLineItems(id, {
-      expand: ["data.price.product"],
+  // Proceed with creating order in Sanity
+  const LineItemWithProduct = await Stripe.Checkout.session.listLineItems(id, {
+    expand: ["data.price.product"],
   });
-  
-  
 
-  const sanityProduct = LineItemWithProduct.data.map((item:any) => ({
-    key:crypto.randomUUID(),
+  console.log("Line Items:", LineItemWithProduct.data); // Log line items
+
+  const sanityProduct = LineItemWithProduct.data.map((item: any) => ({
+    key: crypto.randomUUID(),
     product: {
       _type: 'reference',
-      _ref: (item.price?.product as Stripe.Product)?.metadata?.id
+      _ref: (item.price?.product as Stripe.Product)?.metadata?.id,
     },
-    quantity:item.quantity || 0
-  }))
+    quantity: item.quantity || 0,
+  }));
 
-  const order = await backendClient.create({
-    _type: "orderType",
-    nameNumber: orderNumber,
-    stripeCheckoutSeccionId: id,
-    stripePaymentIntentId: payment_intent,
-    stripeCustomerId: customer,
-    clerkUserId: ClerkUserId,
-    customerName,
-    customerEmail,
-    products: sanityProduct, // Ensure this matches the schema definition
-    total: amount_total ?.toString() ? amount_total / 100 : 0, // Convert Stripe's amount  // Convert Stripe's amount (in cents) to the proper format
-    currency: session.currency, // Ensure session.currency is passed correctly
-    amountDiscounted: total_details?.amount_discount ? total_details.amount_discount / 100 : 0,
-    status: "paid",
-    orderDate: new Date(orderDate || Date.now()).toISOString(), // Use metadata's orderDate or current timestamp
-});
+  // Ensure sanityProduct is populated correctly
+  console.log("Sanity Product Data:", sanityProduct);
 
-  return order
- 
+  try {
+    const order = await backendClient.create({
+      _type: "orderType",
+      nameNumber: orderNumber,
+      stripeCheckoutSeccionId: id,
+      stripePaymentIntentId: payment_intent,
+      stripeCustomerId: customer,
+      clerkUserId: ClerkUserId,
+      customerName,
+      customerEmail,
+      products: sanityProduct,
+      total: amount_total ? amount_total / 100 : 0,
+      currency: session.currency,
+      amountDiscounted: total_details?.amount_discount ? total_details.amount_discount / 100 : 0,
+      status: "paid",
+      orderDate: new Date(orderDate || Date.now()).toISOString(),
+    });
+
+    console.log("Order Created:", order);
+    return order;
+  } catch (error) {
+    console.error("Error Creating Order in Sanity:", error);
+    throw new Error("Failed to create order in Sanity");
+  }
 }

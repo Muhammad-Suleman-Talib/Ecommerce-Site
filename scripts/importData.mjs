@@ -1,4 +1,11 @@
 
+
+
+
+
+
+
+
 import { createClient } from '@sanity/client';
 import axios from 'axios';
 import dotenv from 'dotenv';
@@ -111,7 +118,11 @@ async function importData() {
 }
 
 // Run the import function every minute (60000 ms)
-setInterval(importData, 3600000); // 1 hour = 3600000 milliseconds
+// Run the import function on server start
+importData();
+
+// Run the import function every 1 hour (3600000 ms)
+setInterval(importData, 900000); 
 
 
 

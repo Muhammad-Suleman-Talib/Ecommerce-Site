@@ -28,7 +28,7 @@ function extractPlainText(description: any): string {
   }
   
   export async function createCheckoutSession(items: GroupedBasketItem[], metadata: Metadata) {
-    const stripe = new Stripe(process.env['STRIPE_SECRET-KEY']!, { apiVersion: '2024-12-18.acacia' });
+    const stripe = new Stripe(process.env['STRIPE_SECRET_KEY']!, { apiVersion: '2024-12-18.acacia' });
   
     const customers = await stripe.customers.list({
       email: metadata.customerEmail,
@@ -47,7 +47,7 @@ function extractPlainText(description: any): string {
       customer_email: customer_id ? undefined : metadata.customerEmail,
       metadata,
       mode: "payment",
-      allow_promotion_codes: true,
+      // allow_promotion_codes: true,
       success_url: `https://iphone-store-online.vercel.app/success?orderNumber=${metadata.orderNumber}`,
       cancel_url: `https://iphone-store-online.vercel.app/basket`,
       

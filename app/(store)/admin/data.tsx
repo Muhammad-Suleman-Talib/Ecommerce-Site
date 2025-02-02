@@ -208,6 +208,7 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Loader from "@/components/loader";
 
 interface Product {
   id: string;
@@ -320,7 +321,10 @@ const App = () => {
     setForm({ ...product }); // Use a spread to ensure the form is updated with the current product's data
   };
 
-  if (loading) return <p className="text-center">Loading...</p>;
+
+    
+
+  if (loading) return <p className="text-center"><Loader /></p>;
 
   return (
     <div className="container mx-auto p-6">
@@ -432,6 +436,9 @@ const App = () => {
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
               >
                 Delete
+              </button>
+              <button >
+                 import data
               </button>
             </div>
           </div>
