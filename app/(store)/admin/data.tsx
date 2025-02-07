@@ -1,444 +1,168 @@
-// 'use client'
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
 
-// const App = () => {
-//   const [products, setProducts] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [editingProduct, setEditingProduct] = useState(null);
-//   const [form, setForm] = useState({
-//     title: "",
-//     price: "",
-//     description: "",
-//     image: "",
-//     category: "",
-//   });
 
-//   // Fetch products
-//   useEffect(() => {
-//     const fetchProducts = async () => {
-//       try {
-//         const response = await axios.get("https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce");
-//         setProducts(response.data);
-//       } catch (error) {
-//         console.error("Error fetching products", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchProducts();
-//   }, []);
+'use client';
 
-//   // Handle form input change
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setForm({ ...form, [name]: value });
-//   };
 
-//   const handleImageChange = (e) => {
-//     const file = e.target.files[0];
-//     if (file) {
-//       const reader = new FileReader();
-//       reader.onloadend = () => {
-//         setForm({ ...form, image: reader.result });
-//       };
-//       reader.readAsDataURL(file);
-//     }
-//   };
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useUser } from '@clerk/nextjs';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ShoppingCart, Package, Users, DollarSign } from 'lucide-react';
+import Loader from '@/components/loader';
 
-//   // Handle create or update
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       if (editingProduct) {
-//         // Update product
-//         await axios.put(`https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce/${editingProduct.id}`, form);
-//         setProducts(
-//           products.map((product) =>
-//             product.id === editingProduct.id ? { ...product, ...form } : product
-//           )
-//         );
-//       } else {
-//         // Create new product
-//         const response = await axios.post("https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce", form);
-//         setProducts([...products, response.data]);
-//       }
-//       resetForm();
-//     } catch (error) {
-//       console.error("Error submitting form", error);
-//     }
-//   };
 
-//   // Handle delete
-//   const deleteProduct = async (id) => {
-//     try {
-//       await axios.delete(`https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce/${id}`);
-//       setProducts(products.filter((product) => product.id !== id));
-//     } catch (error) {
-//       console.error("Error deleting product", error);
-//     }
-//   };
+const API_URL = 'https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce';
 
-//   // Reset form
-//   const resetForm = () => {
-//     setForm({ title: "", price: "", description: "", image: "", category: "" });
-//     setEditingProduct(null);
-//   };
+export default function AdminDashboard() {
+  const [activePage, setActivePage] = useState('dashboard');
+  
+  return (
+    <div className="flex h-screen bg-blue-50">
+      {/* Sidebar */}
+      <div className="w-64 bg-blue-900 text-white p-5">
+        <h2 className="text-xl font-bold mb-6">Admin Panel</h2>
+        <nav>
+          <ul className="space-y-4">
+            {['Dashboard', 'All Products', 'Manage Products', 'View Orders', 'Users'].map((name) => (
+              <li key={name}>
+                <button 
+                  onClick={() => setActivePage(name.toLowerCase().replace(/ /g, ''))}
+                  className={`w-full text-left p-2 rounded ${activePage === name.toLowerCase().replace(/ /g, '') ? 'bg-blue-700' : 'hover:bg-blue-600'}`}
+                >
+                  {name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
 
-//   // Handle edit
-//   const handleEdit = (product) => {
-//     setEditingProduct(product);
-//     setForm(product);
-//   };
-
-//   if (loading) return <p className="text-center">Loading...</p>;
-
-//   return (
-//     <div className="container mx-auto p-6">
-//       <h1 className="text-4xl font-extrabold text-center mb-8 text-gray-800">Admin Dashboard - FakeStore Products</h1>
-
-//       {/* Form Section */}
-//       <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-//         <div className="flex space-x-4">
-//           <input
-//             type="file"
-//             accept="image/*"
-//             onChange={handleImageChange}
-//             className="block w-1/4 p-2 border rounded"
-//           />
-//           {form.image && (
-//             <img src={form.image} alt="Product Preview" className="w-16 h-16 object-cover rounded" />
-//           )}
-//         </div>
-        
-//         <div className="space-y-2">
-//           <input
-//             type="text"
-//             name="title"
-//             value={form.title}
-//             onChange={handleChange}
-//             placeholder="Product Title"
-//             className="block w-full p-2 border rounded shadow-sm"
-//           />
-//           <input
-//             type="text"
-//             name="price"
-//             value={form.price}
-//             onChange={handleChange}
-//             placeholder="Price"
-//             className="block w-full p-2 border rounded shadow-sm"
-//           />
-//           <input
-//             type="text"
-//             name="category"
-//             value={form.category}
-//             onChange={handleChange}
-//             placeholder="Category"
-//             className="block w-full p-2 border rounded shadow-sm"
-//           />
-//           <textarea
-//             name="description"
-//             value={form.description}
-//             onChange={handleChange}
-//             placeholder="Product Description"
-//             rows="4"
-//             className="block w-full p-2 border rounded shadow-sm"
-//           />
-//         </div>
-        
-//         <div className="flex items-center space-x-4">
-//           <button className="px-6 py-2 bg-blue-600 text-white rounded shadow-md hover:bg-blue-700 transition">
-//             {editingProduct ? "Update Product" : "Add Product"}
-//           </button>
-//           {editingProduct && (
-//             <button
-//               type="button"
-//               onClick={resetForm}
-//               className="px-6 py-2 bg-gray-600 text-white rounded shadow-md hover:bg-gray-700 transition"
-//             >
-//               Cancel
-//             </button>
-//           )}
-//         </div>
-//       </form>
-
-//       {/* Product List Section */}
-//       <div className="space-y-6 mt-8">
-//         {products.map((product) => (
-//           <div
-//             key={product.id}
-//             className="flex justify-between items-center p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition"
-//           >
-//             <div className="flex items-center space-x-4">
-//               <img
-//                 src={product.image}
-//                 alt={product.title}
-//                 className="w-16 h-16 object-cover rounded"
-//               />
-//               <div>
-//                 <h2 className="font-bold text-xl text-gray-800">{product.title}</h2>
-//                 <p className="text-gray-600">${product.price}</p>
-//                 <p className="text-gray-500 text-sm">{product.category}</p>
-//                 <p className="text-gray-400 text-sm">{product.description}</p>
-//               </div>
-//             </div>
-//             <div className="flex items-center space-x-4">
-//               <button
-//                 onClick={() => handleEdit(product)}
-//                 className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-//               >
-//                 Edit
-//               </button>
-//               <button
-//                 onClick={() => deleteProduct(product.id)}
-//                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-//               >
-//                 Delete
-//               </button>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default App;
-
-'use client'
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Loader from "@/components/loader";
-
-interface Product {
-  id: string;
-  title: string;
-  price: number;
-  description: string;
-  image: string;
-  category: string;
-  stock: number;
+      {/* Main Content */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        {activePage === 'dashboard' && <DashboardContent />}
+        {activePage === 'allproducts' && <ProductsList />}
+        {activePage === 'manageproducts' && <ManageProducts />}
+        {activePage === 'vieworders' && <ViewOrders />}
+        {activePage === 'users' && <UsersList />}
+      </div>
+      <ToastContainer />
+    </div>
+  );
 }
 
-const App = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [form, setForm] = useState<Product>({
-    title: "",
-    price: 0,
-    description: "",
-    image: "",
-    category: "",
-    stock: 0,
-  } as Product);
-  // Fetch products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get<Product[]>("https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce");
-        setProducts(response.data);
-      } catch (error) {
-        console.error("Error fetching products", error);
-      } finally {
-        setLoading(false);
-      }
+function DashboardContent() {
+  const data = [
+    { name: 'Jan', revenue: 5000 },
+    { name: 'Feb', revenue: 7000 },
+    { name: 'Mar', revenue: 6500 },
+    { name: 'Apr', revenue: 8000 },
+    { name: 'May', revenue: 7500 },
+    { name: 'Jun', revenue: 9000 },
+  ];
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold text-blue-900 text-center mb-6">Admin Dashboard</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-6 shadow-lg rounded-2xl flex items-center gap-4">
+          <Package className="text-blue-500 w-10 h-10" />
+          <div>
+            <p className="text-gray-600">Total Products</p>
+            <h2 className="text-xl font-bold">120</h2>
+          </div>
+        </div>
 
-    
-    };
+        <div className="bg-white p-6 shadow-lg rounded-2xl flex items-center gap-4">
+          <ShoppingCart className="text-green-500 w-10 h-10" />
+          <div>
+            <p className="text-gray-600">Total Orders</p>
+            <h2 className="text-xl font-bold">50</h2>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 shadow-lg rounded-2xl flex items-center gap-4">
+          <Users className="text-purple-500 w-10 h-10" />
+          <div>
+            <p className="text-gray-600">Total Users</p>
+            <h2 className="text-xl font-bold">300</h2>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 shadow-lg rounded-2xl flex items-center gap-4">
+          <DollarSign className="text-yellow-500 w-10 h-10" />
+          <div>
+            <p className="text-gray-600">Total Revenue</p>
+            <h2 className="text-xl font-bold">$25,000</h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 shadow-lg rounded-2xl mt-8">
+        <h2 className="text-xl font-bold text-gray-700 mb-4">Revenue Trend</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <XAxis dataKey="name" stroke="#4A5568" />
+            <YAxis stroke="#4A5568" />
+            <Tooltip />
+            <Bar dataKey="revenue" fill="#3182CE" radius={[5, 5, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function ProductsList() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Handle form input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      alert("Error: Could not read file");
-      return;
-    }
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm({ ...form, image: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Handle create or update
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Validation: Ensure all fields are filled before submitting
-    if (!form.title || !form.price || !form.category || !form.stock) {
-      alert("Please fill all required fields");
-      return;
-    }
-
+  const fetchProducts = async () => {
     try {
-      if (editingProduct) {
-        // Update product
-        await axios.put<Product>(`https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce/${editingProduct.id}`, form);
-        setProducts(
-          products.map((product) =>
-            product.id === editingProduct.id ? { ...product, ...form } : product
-          )
-        );
-      } else {
-        // Create new product
-        const response = await axios.post<Product>("https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce", form);
-        setProducts([...products, response.data]);
-      }
-      resetForm();
+      const response = await axios.get(API_URL);
+      setProducts(response.data);
     } catch (error) {
-      console.error("Error submitting form", error);
+      toast.error('Error fetching products');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Handle delete
-  const deleteProduct = async (id: string) => {
+  const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://6789dfdadd587da7ac27e74a.mockapi.io/Ecommerce/${id}`);
-      setProducts(products.filter((product) => product.id !== id));
+      await axios.delete(`${API_URL}/${id}`);
+      setProducts(products.filter(product => product.id !== id));
+      toast.success('Product deleted successfully');
     } catch (error) {
-      console.error("Error deleting product", error);
+      toast.error('Error deleting product');
     }
   };
 
-  // Reset form
-  const resetForm = () => {
-    setForm({id: "", title: "", price: 0, description: "", image: "", category: "", stock: 0 });
-    setEditingProduct(null);
-  };
-
-  // Handle edit
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setForm({ ...product }); // Use a spread to ensure the form is updated with the current product's data
-  };
-
-
-    
-
-  if (loading) return <p className="text-center"><Loader /></p>;
+  if (loading) return <p><Loader/></p>;
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-4xl font-extrabold text-center mb-8 text-gray-800">Admin Dashboard - FakeStore Products</h1>
-
-      {/* Form Section */}
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-        <div className="flex space-x-4">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="block w-1/4 p-2 border rounded"
-          />
-          {form.image && (
-            <img src={form.image} alt="Product Preview" className="w-16 h-16 object-cover rounded" />
-          )}
-        </div>
-        
-        <div className="space-y-2">
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Product Title"
-            className="block w-full p-2 border rounded shadow-sm"
-          />
-          <input
-            type="number"
-            name="price"
-            value={form.price}
-            onChange={handleChange}
-            placeholder="Price"
-            className="block w-full p-2 border rounded shadow-sm"
-          />
-          <input
-            type="text"
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            placeholder="Category"
-            className="block w-full p-2 border rounded shadow-sm"
-          />
-          <input
-            type="number"
-            name="stock"
-            value={form.stock}
-            onChange={handleChange}
-            placeholder="Stock Quantity"
-            className="block w-full p-2 border rounded shadow-sm"
-          />
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Product Description"
-            rows={4}
-            className="block w-full p-2 border rounded shadow-sm"
-          />
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <button className="px-6 py-2 bg-blue-600 text-white rounded shadow-md hover:bg-blue-700 transition">
-            {editingProduct ? "Update Product" : "Add Product"}
-          </button>
-          {editingProduct && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="px-6 py-2 bg-gray-600 text-white rounded shadow-md hover:bg-gray-700 transition"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-
-      {/* Product List Section */}
-      <div className="space-y-6 mt-8">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className="flex justify-between items-center p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition"
-          >
-            <div className="flex items-center space-x-4">
-              <img
-                src={product.image}
-                alt={product.title}
-                className="w-16 h-16 object-cover rounded"
-              />
-              <div>
-                <h2 className="font-bold text-xl text-gray-800">{product.title}</h2>
-                <p className="text-gray-600">${product.price}</p>
-                <p className="text-gray-500 text-sm">{product.category}</p>
-                <p className="text-gray-400 text-sm">{product.description}</p>
-                <p className="text-gray-500 text-sm">Stock: {product.stock}</p>
-              </div>
+    <div className="max-w-7xl mx-auto p-4">
+      <h1 className="text-2xl font-bold text-blue-900 text-center">All Products</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
+        {products.map(product => (
+          <div key={product.id} className="bg-white p-4 shadow rounded text-center">
+            <div className="w-full flex justify-center">
+              <img src={product.image} alt={product.title} className="w-32 h-32 object-cover rounded-lg" />
             </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => handleEdit(product)}
-                className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-              >
-                Edit
+            <h2 className="text-lg font-bold mt-2 text-blue-800 break-words">{product.title}</h2>
+            <p className="text-gray-600">${product.price}</p>
+            <div className="flex justify-center mt-2 space-x-3">
+              <button className="text-blue-600 hover:text-blue-800">
+                <FaEdit size={18} />
               </button>
-              <button
-                onClick={() => deleteProduct(product.id)}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-              >
-                Delete
-              </button>
-              <button >
-                 import data
+              <button onClick={() => handleDelete(product.id)} className="text-red-600 hover:text-red-800">
+                <FaTrash size={18} />
               </button>
             </div>
           </div>
@@ -446,7 +170,104 @@ const App = () => {
       </div>
     </div>
   );
-};
+}
 
-export default App;
+function ManageProducts() {
+  const [products, setProducts] = useState([]);
+  const [form, setForm] = useState({ title: '', price: 0, description: '', image: '', category: '', stock: 0 });
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(API_URL);
+      setProducts(response.data);
+    } catch (error) {
+      toast.error('Error fetching products');
+    }
+  };
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(API_URL, form);
+      setProducts([...products, response.data]);
+      toast.success('Product added successfully');
+      setForm({ title: '', price: 0, description: '', image: '', category: '', stock: 0 }); // Reset form
+    } catch (error) {
+      toast.error('Error adding product');
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto p-4">
+      <h1 className="text-2xl font-bold text-blue-900">Manage Products</h1>
+      <form onSubmit={handleSubmit} className="bg-white p-4 shadow rounded mt-4">
+        <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full p-2 border rounded mb-2" required />
+        <input type="number" name="price" value={form.price} onChange={handleChange} placeholder="Price" className="w-full p-2 border rounded mb-2" required />
+        <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full p-2 border rounded mb-2" required />
+        <input type="text" name="image" value={form.image} onChange={handleChange} placeholder="Image URL" className="w-full p-2 border rounded mb-2" required />
+        <input type="text" name="category" value={form.category} onChange={handleChange} placeholder="Category" className="w-full p-2 border rounded mb-2" required />
+        <input type="number" name="stock" value={form.stock} onChange={handleChange} placeholder="Stock" className="w-full p-2 border rounded mb-2" required />
+        <button type="submit" className="bg-blue-600 text-white p-2 rounded">Add Product</button>
+      </form>
+    </div>
+  );
+}
+
+function UsersList() {
+  const { user } = useUser();
+  return (
+    <div className="max-w-7xl mx-auto p-4">
+      <h1 className="text-2xl font-bold text-blue-900">Users List</h1>
+      <div className="bg-white p-4 shadow rounded mt-4">
+        <p><strong>Name:</strong> {user?.fullName}</p>
+        <p><strong>Email:</strong> {user?.emailAddresses[0]?.emailAddress}</p>
+      </div>
+    </div>
+  );
+}
+
+function ViewOrders() {
+  const orders = [
+    { id: 1, customer: "John Doe", total: "$120", status: "Shipped" },
+    { id: 2, customer: "Jane Smith", total: "$250", status: "Processing" },
+    { id: 3, customer: "Alice Johnson", total: "$80", status: "Delivered" },
+    { id: 4, customer: "Bob Brown", total: "$150", status: "Pending" },
+  ];
+
+  return (
+    <div className="max-w-7xl mx-auto p-8">
+    <h1 className="text-2xl font-bold text-blue-900 mb-6">View Orders</h1>
+    <div className="overflow-x-auto">
+      <table className="w-full mt-4 bg-white shadow rounded mx-auto">
+        <thead>
+          <tr className="bg-blue-200 sticky top-0">
+            <th className="p-2 text-center">Order ID</th>
+            <th className="p-2 text-center">Customer</th>
+            <th className="p-2 text-center">Total</th>
+            <th className="p-2 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map(order => (
+            <tr key={order.id} className="border-t hover:bg-gray-100">
+              <td className="p-2 text-center">{order.id}</td>
+              <td className="p-2 text-center">{order.customer}</td>
+              <td className="p-2 text-center">{order.total}</td>
+              <td className="p-2 text-center">{order.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  );
+}
