@@ -194,7 +194,7 @@ export default function BasketPage() {
     return (
       <div className="w-full min-h-screen flex flex-col items-center justify-center bg-blue-600 text-white">
         <h1 className="text-3xl font-extrabold mb-8 text-yellow-400">Your Basket is Empty</h1>
-        <p className="text-base text-gray-200 mb-4">
+        <p className="text-base text-gray-200 mb-4 text-center">
           It looks like you haven’t added any items to your basket yet.
         </p>
         <button

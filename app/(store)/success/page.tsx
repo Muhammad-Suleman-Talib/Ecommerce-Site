@@ -50,7 +50,7 @@ function SuccessPage() {
         </div>
         <div className="flex gap-4">
           <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            <Link href={'/order'}>view order</Link>
+            <Link href={'/admin'}>view order</Link>
           </button>
           <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
           <Link href={'/'}>Continue Shopping</Link>

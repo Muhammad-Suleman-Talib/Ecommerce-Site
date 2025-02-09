@@ -21,7 +21,7 @@ async function ProductPage({ params }: { params: { slug: string } }) {
 
   return (
     <div className="container mx-auto px-8 py-12 bg-gradient-to-br from-blue-50 to-white rounded-lg shadow-lg ">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center ">
         {/* Product Image */}
         <div
           className={`relative overflow-hidden rounded-lg shadow-xl transition-opacity duration-300 ${
